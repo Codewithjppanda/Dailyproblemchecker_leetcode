@@ -6,7 +6,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 
-# ─── Load credentials from .env ───────────────────────
+# Load credentials from .env 
 load_dotenv()
 LEETCODE_SESSION = os.getenv("LEETCODE_SESSION")
 CSRF_TOKEN       = os.getenv("CSRF_TOKEN")
@@ -60,12 +60,12 @@ def check_daily_challenge_status(session):
     raw = node.get("date")
     record_date = None
 
-    # try int (milliseconds)
+    
     try:
         ms = int(raw)
         record_date = datetime.fromtimestamp(ms / 1000).date()
     except (ValueError, TypeError):
-        # try ISO string
+        
         try:
             record_date = datetime.fromisoformat(raw).date()
         except Exception:
