@@ -83,7 +83,8 @@ Example `cron` entry:
 
 ## 📸 Screenshot
 
-<img src="https://i.imgur.com/2WnyMws.png" width="500" alt="Email example showing LeetCode problem solved message">
+![image](https://github.com/user-attachments/assets/65e066b7-ad02-48c0-ad06-a8521eb8c40c)
+
 
 ---
 
