@@ -1,0 +1,33 @@
+name: LeetCode Daily Problem Checker
+
+on:
+  schedule:
+    - cron: '25 18 * * *'  # ⏰ Runs daily at 11:55 PM IST (UTC+5:30)
+  workflow_dispatch:        # 🧪 Allows manual runs for testing
+
+jobs:
+  check-daily:
+    runs-on: ubuntu-latest
+
+    env:
+      EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+      EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+      EMAIL_RECEIVER: ${{ secrets.EMAIL_RECEIVER }}
+      LEETCODE_SESSION: ${{ secrets.LEETCODE_SESSION }}
+      CSRF_TOKEN: ${{ secrets.CSRF_TOKEN }}
+
+    steps:
+      - name: 🧾 Checkout code
+        uses: actions/checkout@v3
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: 📦 Install dependencies
+        run: |
+          pip install -r requirements.txt || echo "No requirements.txt file, skipping..."
+
+      - name: 🚀 Run your daily checker
+        run: python leetcode_bot.py
