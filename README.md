@@ -140,7 +140,3 @@ MIT License — free to use and modify.
 
 Built by [@Codewithjppanda](https://github.com/Codewithjppanda) — feel free to fork, star, or suggest improvements!
 ```
-
----
-
-Let me know if you'd like me to push this directly as a `README.md`, or you can paste it directly in your GitHub repo. Looks awesome now! 🚀
