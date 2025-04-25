@@ -1,104 +1,146 @@
 
 
+```
+https://github.com/user-attachments/assets/65e066b7-ad02-48c0-ad06-a8521eb8c40c
+```
 
+---
+
+### ✅ Updated `README.md`
 
 ```markdown
-# 📬 Daily LeetCode Problem Checker
+# 📬 LeetCode Daily Problem Checker Bot
 
-A Python bot that checks if you’ve completed your **LeetCode Daily Challenge** and sends you an email notification as a reminder or congratulations—every day before midnight.
+This is a fully automated Python bot that checks whether you've solved the **LeetCode Daily Challenge** — and sends you a personalized email notification daily at **11:55 PM IST**.
 
----
-
-## ✅ Features
-
-- ✔️ Authenticates with your LeetCode account using session and CSRF tokens.
-- 📅 Checks if you’ve solved the current day's daily problem.
-- 📧 Sends an email:
-  - If solved: a congratulatory message.
-  - If not solved: a gentle reminder with a link to the problem.
-- 🕒 Designed to be scheduled via `cron` or Task Scheduler for automation.
+> 🚀 Runs on **GitHub Actions**, so you don’t need to keep your laptop on — works from the cloud.
 
 ---
 
-## 🔧 Setup
+## 🔧 Built With
 
-### 1. Clone the repository
+- 🐍 **Python** – for script logic and email sending (SMTP)
+- ⚙️ **GitHub Actions** – to schedule daily execution at 11:55 PM IST
+- 📬 **Gmail App Passwords** – for secure email authentication
+- 🔐 **GitHub Secrets** – to store your credentials safely
+- 🔎 **LeetCode GraphQL API** – to check your daily problem status via `activeDailyCodingChallengeQuestion`
+
+---
+
+## 📸 Example Email
+
+> Here's what you get daily in your inbox:
+
+![LeetCode Daily Email Screenshot](https://github.com/user-attachments/assets/65e066b7-ad02-48c0-ad06-a8521eb8c40c)
+
+---
+
+## 💡 Why This Project?
+
+I wanted something that keeps me accountable with LeetCode daily challenges — without relying on streaks or pop-ups. So I built a fully cloud-based reminder system that emails me whether I’ve solved the problem or not.
+
+Along the way, I learned:
+- How to authenticate with LeetCode using cookies and CSRF tokens
+- How to query LeetCode’s private GraphQL API
+- How to automate cloud scripts using GitHub Actions
+- How to secure sensitive info using GitHub Secrets
+
+---
+
+## 📁 Folder Structure
+
+```bash
+Dailyproblemchecker_leetcode/
+├── leetcode_bot.py          # Main script
+├── requirements.txt         # Dependencies
+├── .github/workflows/
+│   └── daily_check.yml      # GitHub Actions workflow file
+```
+
+---
+
+## ⚙️ Setup Instructions
+
+### 1. Fork or clone this repo
 
 ```bash
 git clone https://github.com/Codewithjppanda/Dailyproblemchecker_leetcode.git
 cd Dailyproblemchecker_leetcode
 ```
 
-### 2. Create a virtual environment (optional but recommended)
+### 2. Create your `requirements.txt`
 
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+```txt
+requests
 ```
 
-### 3. Install dependencies
+### 3. Update your GitHub Secrets
 
-```bash
-pip install -r requirements.txt
+Go to:  
+`GitHub → Settings → Secrets → Actions → New Repository Secret`
+
+Add the following:
+
+| Key               | Value                         |
+|------------------|-------------------------------|
+| `EMAIL_SENDER`     | Your Gmail address             |
+| `EMAIL_PASSWORD`   | Gmail App Password (not normal password) |
+| `EMAIL_RECEIVER`   | Receiver email address         |
+| `LEETCODE_SESSION` | Your session cookie from browser |
+| `CSRF_TOKEN`       | Your `csrftoken` from browser  |
+
+### 4. GitHub Workflow
+
+The workflow is set to run:
+
+```yaml
+schedule:
+  - cron: '25 18 * * *' # This runs daily at 11:55 PM IST
 ```
 
-### 4. Create a `.env` file
-
-```
-EMAIL_SENDER=your_gmail@gmail.com
-EMAIL_PASSWORD=your_app_password      # Use Gmail App Password (not your Gmail login)
-EMAIL_RECEIVER=recipient_email@gmail.com
-LEETCODE_SESSION=your_leetcode_session_cookie
-CSRF_TOKEN=your_leetcode_csrf_token
-```
-
-> ⚠️ Make sure your Gmail has 2FA enabled and use an App Password from [https://myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
+You can also run it manually from the **Actions** tab on GitHub.
 
 ---
 
-## 🔐 Security
+## 🔗 Repository URL
 
-- Ensure `.env` is **not committed** to Git:
-```bash
-echo ".env" >> .gitignore
-```
-
-- If you accidentally push `.env`, **immediately revoke** any exposed credentials.
+[👉 View the repo](https://github.com/Codewithjppanda/Dailyproblemchecker_leetcode)
 
 ---
 
-## 📅 Automating the Script
+## 🛡️ Security Tips
 
-You can schedule this script to run daily at 11:55 PM using:
-
-- **Linux/macOS**: `cron`
-- **Windows**: Task Scheduler
-
-Example `cron` entry:
-```bash
-55 23 * * * /usr/bin/python3 /path/to/leetcode_bot.py
-```
+- Never commit your `.env` file or credentials
+- Always use GitHub Secrets for sensitive data
+- Revoke leaked Gmail App Passwords immediately
 
 ---
 
-## 📸 Screenshot
+## ⭐ Want to Support?
 
-![image](https://github.com/user-attachments/assets/65e066b7-ad02-48c0-ad06-a8521eb8c40c)
-
-
----
-
-## 💡 Credits
-
-Made with ❤️ by [@Codewithjppanda](https://github.com/Codewithjppanda)
+Give this repo a ⭐ if it helps you stay consistent with LeetCode!
 
 ---
 
 ## 📜 License
 
-This project is licensed under the MIT License.
+MIT License — free to use and modify.
+
+---
+
+## 🔥 Bonus Ideas (Pull Requests Welcome!)
+
+- [ ] Add Discord/Telegram bot notification support
+- [ ] Log daily statuses in a Google Sheet or CSV
+- [ ] Send weekly summary email with streak insights
+
+---
+
+## 🤝 Let's Connect
+
+Built by [@Codewithjppanda](https://github.com/Codewithjppanda) — feel free to fork, star, or suggest improvements!
 ```
 
 ---
 
-Let me know if you'd like a dark-mode badge, email screenshot mockup, or deployment guide for serverless platforms too!
+Let me know if you'd like me to push this directly as a `README.md`, or you can paste it directly in your GitHub repo. Looks awesome now! 🚀
