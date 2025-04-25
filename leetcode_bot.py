@@ -1,77 +1,60 @@
 import os
 import smtplib
 import requests
-from datetime import datetime
+from datetime import datetime, timezone
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from dotenv import load_dotenv
 
-# Load credentials from .env 
-load_dotenv()
-LEETCODE_SESSION = os.getenv("LEETCODE_SESSION")
-CSRF_TOKEN       = os.getenv("CSRF_TOKEN")
-EMAIL_SENDER     = os.getenv("EMAIL_SENDER")
-EMAIL_PASSWORD   = os.getenv("EMAIL_PASSWORD")
-EMAIL_RECEIVER   = os.getenv("EMAIL_RECEIVER")
+# Load credentials from environment
+EMAIL_SENDER     = os.environ["EMAIL_SENDER"]
+EMAIL_PASSWORD   = os.environ["EMAIL_PASSWORD"]
+EMAIL_RECEIVER   = os.environ["EMAIL_RECEIVER"]
+LEETCODE_SESSION = os.environ["LEETCODE_SESSION"]
+CSRF_TOKEN       = os.environ["CSRF_TOKEN"]
+
+# Treat any of these (case-insensitive) as “solved”
+SOLVED_STATUSES = {"ac", "finished", "finish", "completed", "success"}
 
 def make_leetcode_session():
-    """
-    Create a session with both cookies set manually.
-    Avoids any forbidden GETs.
-    """
     s = requests.Session()
     s.headers.update({
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                      "AppleWebKit/537.36 (KHTML, like Gecko) "
-                      "Chrome/117.0.0.0 Safari/537.36",
-        "Referer":    "https://leetcode.com",
-        "Origin":     "https://leetcode.com",
+        "User-Agent":   "Mozilla/5.0",
+        "Referer":      "https://leetcode.com",
+        "Origin":       "https://leetcode.com",
+        "Content-Type": "application/json",
+        "Accept":       "application/json",
+        "X-CSRFToken":  CSRF_TOKEN
     })
     s.cookies.set("LEETCODE_SESSION", LEETCODE_SESSION, domain=".leetcode.com")
-    s.cookies.set("csrftoken",       CSRF_TOKEN,       domain=".leetcode.com")
+    s.cookies.set("csrftoken", CSRF_TOKEN, domain=".leetcode.com")
     return s
 
 def check_daily_challenge_status(session):
-    """
-    Fetch today's activeDailyCodingChallengeQuestion.
-    Return (userStatus, title, titleSlug) or (None, None, None).
-    """
     payload = {
         "query": """
-        query questionOfToday {
+        query {
           activeDailyCodingChallengeQuestion {
             date
             userStatus
-            question {
-              title
-              titleSlug
-            }
+            question { title titleSlug }
           }
         }
         """,
         "variables": {}
     }
-
     resp = session.post("https://leetcode.com/graphql", json=payload)
     resp.raise_for_status()
     node = resp.json()["data"]["activeDailyCodingChallengeQuestion"]
 
-    # Parse the date field which might be an int (ms) or a "YYYY-MM-DD" string
-    raw = node.get("date")
-    record_date = None
-
-    
+    # parse date (ms or ISO string)
+    raw = node["date"]
     try:
-        ms = int(raw)
-        record_date = datetime.fromtimestamp(ms / 1000).date()
+        record_date = datetime.fromtimestamp(int(raw) / 1000, tz=timezone.utc).date()
     except (ValueError, TypeError):
-        
-        try:
-            record_date = datetime.fromisoformat(raw).date()
-        except Exception:
-            pass
+        record_date = datetime.fromisoformat(raw).date()
 
-    if record_date != datetime.utcnow().date():
+    # only proceed if it’s today
+    if record_date != datetime.now(timezone.utc).date():
         return None, None, None
 
     return node["userStatus"], node["question"]["title"], node["question"]["titleSlug"]
@@ -92,17 +75,15 @@ def main():
     session = make_leetcode_session()
     status, title, slug = check_daily_challenge_status(session)
 
-    if status == "AC":
+    if status and status.lower() in SOLVED_STATUSES:
         subject = "✅ LeetCode Daily Solved!"
-        body    = f"You've solved today's problem:\n\n{title}\n" \
-                  f"https://leetcode.com/problems/{slug}/"
-    elif status:
+        body    = f"You've solved today's problem:\n\n{title}\nhttps://leetcode.com/problems/{slug}/"
+    elif status and status.lower() == "not_started":
         subject = "❌ LeetCode Daily NOT Solved!"
-        body    = (
-            f"You have NOT yet solved today's problem:\n\n"
-            f"{title}\nhttps://leetcode.com/problems/{slug}/\n\n"
-            "Please complete it before midnight!"
-        )
+        body    = f"You have NOT yet solved today's problem:\n\n{title}\nhttps://leetcode.com/problems/{slug}/\n\nPlease complete it before midnight!"
+    elif status:
+        subject = "⚠️ LeetCode Check Unexpected Status"
+        body    = f"LeetCode returned an unexpected status: `{status}`."
     else:
         subject = "⚠️ LeetCode Check Failed!"
         body    = "Could not fetch today's challenge status. Check your session/CSRF token."
