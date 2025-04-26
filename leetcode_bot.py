@@ -12,7 +12,7 @@ EMAIL_RECEIVER   = os.environ["EMAIL_RECEIVER"]
 LEETCODE_SESSION = os.environ["LEETCODE_SESSION"]
 CSRF_TOKEN       = os.environ["CSRF_TOKEN"]
 
-# Treat any of these (case-insensitive) as “solved”
+# Any of these (case‐insensitive) count as “solved”
 SOLVED_STATUSES = {"ac", "finished", "finish", "completed", "success"}
 
 def make_leetcode_session():
@@ -46,14 +46,14 @@ def check_daily_challenge_status(session):
     resp.raise_for_status()
     node = resp.json()["data"]["activeDailyCodingChallengeQuestion"]
 
-    # parse date (ms or ISO string)
+    # Parse the date (either ms‐since‐epoch or ISO string)
     raw = node["date"]
     try:
         record_date = datetime.fromtimestamp(int(raw) / 1000, tz=timezone.utc).date()
     except (ValueError, TypeError):
         record_date = datetime.fromisoformat(raw).date()
 
-    # only proceed if it’s today
+    # Only act if it’s truly today’s challenge
     if record_date != datetime.now(timezone.utc).date():
         return None, None, None
 
@@ -74,17 +74,21 @@ def send_email(subject, body):
 def main():
     session = make_leetcode_session()
     status, title, slug = check_daily_challenge_status(session)
+    status_norm = status.lower() if status else None
 
-    if status and status.lower() in SOLVED_STATUSES:
+    if status_norm in SOLVED_STATUSES:
         subject = "✅ LeetCode Daily Solved!"
         body    = f"You've solved today's problem:\n\n{title}\nhttps://leetcode.com/problems/{slug}/"
-    elif status and status.lower() == "not_started":
+    elif status_norm:
+        # Any other non‐None status (e.g. "notstart", "started", etc.) → not solved
         subject = "❌ LeetCode Daily NOT Solved!"
-        body    = f"You have NOT yet solved today's problem:\n\n{title}\nhttps://leetcode.com/problems/{slug}/\n\nPlease complete it before midnight!"
-    elif status:
-        subject = "⚠️ LeetCode Check Unexpected Status"
-        body    = f"LeetCode returned an unexpected status: `{status}`."
+        body    = (
+            f"You have NOT yet solved today's problem:\n\n"
+            f"{title}\nhttps://leetcode.com/problems/{slug}/\n\n"
+            "Please complete it before midnight!"
+        )
     else:
+        # status is None → we couldn't fetch today's challenge
         subject = "⚠️ LeetCode Check Failed!"
         body    = "Could not fetch today's challenge status. Check your session/CSRF token."
 
