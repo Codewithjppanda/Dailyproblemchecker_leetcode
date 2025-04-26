@@ -1,7 +1,3 @@
-
-
-```
-https://github.com/user-attachments/assets/65e066b7-ad02-48c0-ad06-a8521eb8c40c
 ```
 
 ---
